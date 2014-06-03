@@ -1,5 +1,10 @@
 """
 Derive expected mean squares from a linear model in latex form.
+
+Authors:
+Geoff
+Tom
+
 """
 
 class ExMeanSquare:
