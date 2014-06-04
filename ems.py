@@ -70,7 +70,7 @@ class ExMeanSquare:
         for i_col, subscript in enumerate(colnames):
             for i_row, param in enumerate(rownames):
                 cell = 'FILL_IN'
-                if re.search('\(?.*' + subscript + '.*\)?', param): # inside ()
+                if re.search('\(?.*' + subscript + '.*\)?', param): # inside ()     
                     cell = 1
                 elif re.search(subscript + '.*\(', param): # outside ()
                     if model_list[i_row]['effect_type'] in 'fixed':
@@ -81,10 +81,19 @@ class ExMeanSquare:
                         cell = model_list[i_row]['n_levels']
                 table[i_row][i_col] = cell
 
-        # 4 - blah blah
+        # 4 - Put together the variance terms.
+        # For each row, make a list of variance terms that include all
+        # subscript letters, inside or outside parentheses.
+        # Let's output a list of lists.
+        # For each term in the linear model, make a list of which of those
+        # terms we'll have to include a variance for.
 
-        # 5 - blah blah
 
+        # 5 - Multiply each of the variance terms by their appropriate
+        # numbers in the numerical table we constructed in step three.
+
+
+        # Save the output of this process.
         self.model = model
         self.model_list = model_list
         self.rownames = rownames
