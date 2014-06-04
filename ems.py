@@ -15,9 +15,11 @@ class ExMeanSquare:
                 E.g. r"\alpha_{j} + \beta_{k} + \pi_{i(j)} + \epsilon_{i(jk)}"
                 Be sure to use a raw string!
             effect_type: a list of 'fixed' or 'random' for each model term.
+                Note: for interactions, if one term is random, the interaciton is too
             n_levels: a list of number of levels in each non-error term.
                 len(n_levels) must equal len(model) - 1, since we don't
                 need the number of levels of the error term.
+                Note: for interactions, enter 'None'
         """
 
         # 1 - Write linear model
@@ -63,6 +65,8 @@ class ExMeanSquare:
         # Cols: each subscript present in the model
         rownames = model_terms
         colnames = set([term['subscripts_nopar'] for term in model_list])
+        colnames = [name for name in colnames if len(name) ==1]
+
         table = [[None for n in range(len(colnames))] \
                     for m in range(len(rownames))]
 
@@ -74,9 +78,9 @@ class ExMeanSquare:
                     cell = 1
                 elif re.search(subscript + '.*\(', param): # outside ()
                     if model_list[i_row]['effect_type'] in 'fixed':
-                        cell = 1
-                    elif model_list[i_row]['effect_type'] in 'random':
                         cell = 0
+                    elif model_list[i_row]['effect_type'] in 'random':
+                        cell = 1
                 elif not re.search(subscript, param): # not in term
                         cell = model_list[i_row]['n_levels']
                 table[i_row][i_col] = cell
@@ -87,6 +91,29 @@ class ExMeanSquare:
         # Let's output a list of lists.
         # For each term in the linear model, make a list of which of those
         # terms we'll have to include a variance for.
+
+        # make a list of boolean lists per term that specifies which variances
+        # should be included in the E(MS) 
+        var_list = []
+        # for every single row
+        for i_row, param in enumerate(rownames):
+            param_var = []
+            # get the subscripts for this parameter
+            param_sub = model_list[i_row]['subscripts_nopar'] +\
+                        model_list[i_row]['subscripts_par']
+            
+            # check all the other terms for identical subscripts
+            for term in model_list:
+                # get the subscripts for this term
+                term_sub = term['subscripts_nopar'] + term['subscripts_par']
+                # if the term has all the subscripts of the parameter
+                if all(sub in term_sub for sub in param_sub):
+                    param_var.append(True)
+                else:
+                    param_var.append(False)
+
+            # add the variances for this term to the variance list
+            var_list.append(param_var)
 
 
         # 5 - Multiply each of the variance terms by their appropriate
